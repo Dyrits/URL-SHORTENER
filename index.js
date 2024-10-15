@@ -32,7 +32,7 @@ app.get("/api/hello", function (req, res) {
 });
 
 function validate(request, response, next) {
-  const pattern = /^(https?:\/\/(www\.)?[a-z0-9\-]+(\.[a-z]{2,})+(\/[^\s]*)?)$/i;
+  const pattern = /^(https?:\/\/)?([a-z]+|[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})+)(:\d{1,5})?(\/\S*)?(\?\S*)?$/img;
   if (pattern.test(request.body.url)) {
     next();
   } else {
@@ -41,6 +41,7 @@ function validate(request, response, next) {
 }
 
 app.post("/api/shorturl", validate, (request, response) => {
+  console.log("POST /api/shorturl");
   const { hostname } = parse(request.body.url);
   lookup(hostname, (error, address, family) => {
     if (error) {
@@ -61,9 +62,9 @@ app.post("/api/shorturl", validate, (request, response) => {
 app.get("/api/shorturl/:short_url", (request, response) => {
   const url = urls[request.params.short_url];
   if (url) {
-    response.redirect(url);
+    response.redirect(encodeURI(url));
   } else {
-    response.json({ error: "No short URL found for given input." });
+    response.redirect("/");
   }
 });
 
